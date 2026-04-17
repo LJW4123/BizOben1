@@ -1,14 +1,14 @@
 // 1. Supabase 접속 설정
 const supabaseUrl = 'https://bmgaeoysqkzddltjvvcn.supabase.co';
 const supabaseKey = 'sb_publishable_qYeMU5krnSuyHC3AWe4wMA_jzGll9hX';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 document.addEventListener('DOMContentLoaded', async () => {
 
     // [DB 연동] 참여자 얼라인 데이터 불러오기 및 HTML 생성
     async function loadParticipants() {
         try {
-            const { data, error } = await supabase.from('participants').select('*');
+            const { data, error } = await supabaseClient.from('participants').select('*');
             if (error) throw error;
 
             const container = document.getElementById('participantListContainer');
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // [DB 연동] 운영 맥락 파일 리스트 불러오기
     async function loadContextFiles() {
         try {
-            const { data, error } = await supabase.from('context_files').select('*');
+            const { data, error } = await supabaseClient.from('context_files').select('*');
             if (error) throw error;
 
             const container = document.getElementById('fileListContainer');

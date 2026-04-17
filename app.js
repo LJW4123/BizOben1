@@ -1,63 +1,77 @@
-// 1. Supabase 접속 설정
-const supabaseUrl = 'https://bmgaeoysqkzddltjvvcn.supabase.co';
-const supabaseKey = 'sb_publishable_qYeMU5krnSuyHC3AWe4wMA_jzGll9hX';
-const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
-
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // [DB 연동] 참여자 얼라인 데이터 불러오기 및 HTML 생성
+    // 1. Supabase 클라이언트 초기화를 문서 로드 100% 완료 시점으로 이동 (에러 방지용)
+    if (!window.supabase) {
+        console.error("Supabase 라이브러리 로드 실패");
+        const errHtml = '<div style="padding:15px; color:var(--danger);">데이터베이스 연결 오류 (라이브러리 미설치)</div>';
+        const pCont = document.getElementById('participantListContainer');
+        const fCont = document.getElementById('fileListContainer');
+        if (pCont) pCont.innerHTML = errHtml;
+        if (fCont) fCont.innerHTML = errHtml;
+        return;
+    }
+
+    const supabaseUrl = 'https://bmgaeoysqkzddltjvvcn.supabase.co';
+    const supabaseKey = 'sb_publishable_qYeMU5krnSuyHC3AWe4wMA_jzGll9hX';
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // [DB 연동] 참여자 얼라인 데이터 불러오기
     async function loadParticipants() {
+        const container = document.getElementById('participantListContainer');
+        if (!container) return;
+
         try {
             const { data, error } = await supabaseClient.from('participants').select('*');
-            if (error) throw error;
-
-            const container = document.getElementById('participantListContainer');
-            if (!container) return;
+            if (error) {
+                console.error('participants 쿼리 에러:', error);
+                throw error;
+            }
 
             if (data && data.length > 0) {
                 container.innerHTML = ''; // 로딩 텍스트 제거
                 data.forEach(p => {
-                    // 게이지 색상 결정 (이해도가 낮으면 주황색, 높으면 초록색)
                     const colorVar = p.understanding_level >= 80 ? 'var(--success)' : 'var(--warning)';
+                    const isChecked = p.history_checked ? 'checked' : '';
 
                     const html = `
                         <div class="participant-item">
                             <div class="participant-info">
-                                <strong>${p.name} (${p.manager_name})</strong>
-                                <span class="gauge-label">업무 이해도 ${p.understanding_level}%</span>
+                                <strong>${p.name || '알 수 없는 참여자'} (${p.manager_name || '-'})</strong>
+                                <span class="gauge-label">업무 이해도 ${p.understanding_level || 0}%</span>
                             </div>
                             <div class="gauge-container">
-                                <div class="gauge-bar" style="width: ${p.understanding_level}%; background: ${colorVar};"></div>
+                                <div class="gauge-bar" style="width: ${p.understanding_level || 0}%; background: ${colorVar};"></div>
                             </div>
                             <label class="checkbox-container">
-                                <input type="checkbox" ${p.history_checked ? 'checked' : ''} disabled> 이전 사업 이력 확인 완료
+                                <input type="checkbox" ${isChecked} disabled> 이전 사업 이력 확인 완료
                             </label>
                         </div>
                     `;
                     container.innerHTML += html;
                 });
             } else {
-                container.innerHTML = '<div style="padding:15px; color:var(--text-muted);">등록된 참여자가 없습니다.</div>';
+                container.innerHTML = '<div style="padding:15px; color:var(--text-muted);">지금 바로 Supabase에서 테이블에 임의의 데이터를 1줄 추가해 보세요!</div>';
             }
         } catch (err) {
-            console.error('참여자 로드 에러:', err);
-            document.getElementById('participantListContainer').innerHTML = '데이터를 불러오는 중 문제가 발생했습니다.';
+            container.innerHTML = `<div style="padding:15px; color:var(--danger);">데이터 로드 실패: ${err.message || '알지 못하는 오류가 발생했습니다.'}</div>`;
         }
     }
 
-    // [DB 연동] 운영 맥락 파일 리스트 불러오기
+    // [DB 연동] 운영 맥락 파일 불러오기
     async function loadContextFiles() {
+        const container = document.getElementById('fileListContainer');
+        if (!container) return;
+
         try {
             const { data, error } = await supabaseClient.from('context_files').select('*');
-            if (error) throw error;
-
-            const container = document.getElementById('fileListContainer');
-            if (!container) return;
+            if (error) {
+                console.error('context_files 쿼리 에러:', error);
+                throw error;
+            }
 
             if (data && data.length > 0) {
                 container.innerHTML = '';
                 data.forEach(file => {
-                    // 확장자에 따른 아이콘 변경
                     const isPdf = file.file_type === 'pdf';
                     const iconClass = isPdf ? 'fa-file-pdf pdf-icon' : 'fa-file-word word-icon';
 
@@ -66,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <i class="fa-solid ${iconClass}"></i>
                             <div class="file-details">
                                 <span class="file-name">${file.file_name}</span>
-                                <span class="file-memo">${file.memo}</span>
+                                <span class="file-memo">${file.memo || '...'}</span>
                             </div>
                             <button class="btn-icon" title="다운로드"><i class="fa-solid fa-download"></i></button>
                         </li>
@@ -74,23 +88,58 @@ document.addEventListener('DOMContentLoaded', async () => {
                     container.innerHTML += html;
                 });
             } else {
-                container.innerHTML = '<div style="padding:15px; color:var(--text-muted);">업로드된 파일이 없습니다.</div>';
+                container.innerHTML = '<div style="padding:15px; color:var(--text-muted);">저장된 문서가 없습니다.</div>';
             }
         } catch (err) {
-            console.error('파일 목록 로드 에러:', err);
-            document.getElementById('fileListContainer').innerHTML = '데이터를 불러오는 중 문제가 발생했습니다.';
+            container.innerHTML = `<div style="padding:15px; color:var(--danger);">데이터 로드 실패: ${err.message || '알지 못하는 오류가 발생했습니다.'}</div>`;
         }
     }
 
-    // 초기 데이터 로드 비동기 실행
+    // DB 데이터 로드 실행
     await loadParticipants();
     await loadContextFiles();
 
-    // -------------------------------------------------------------
-    // 아래는 이전과 동일한 애니메이션 및 UI 상호작용 로직들
-    // -------------------------------------------------------------
 
-    // 1. 물품 및 수혜자 추천 로직 (AI 시뮬레이션)
+    // ----------------------------------------------------------------------
+    // [UI 상호작용] 사이드바 메뉴 탭(화면 숨김/표시) 완전 활성화 로직
+    // ----------------------------------------------------------------------
+    const navItems = document.querySelectorAll('.nav-item');
+    const sections = {
+        '#dashboard': ['progress', 'alignment', 'recommendation', 'context'],
+        '#context': ['context'],
+        '#alignment': ['alignment'],
+        '#recommendation': ['recommendation'],
+        '#progress': ['progress']
+    };
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function (e) {
+            e.preventDefault(); // 기본 스크롤 다운 방지
+
+            // 버튼 색상 변경
+            navItems.forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+
+            // 목적지 ID 분석
+            const targetId = this.getAttribute('href');
+            let showList = sections[targetId];
+            if (!showList) showList = sections['#dashboard']; // 매칭 실패시 대시보드(전체)
+
+            // 섹션 숨기기/보이기
+            document.querySelectorAll('main section.card').forEach(sec => {
+                if (showList.includes(sec.id)) {
+                    sec.style.display = 'block';
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+        });
+    });
+
+
+    // ----------------------------------------------------------------------
+    // 기타 애니메이션 및 팝업 모달 로직
+    // ----------------------------------------------------------------------
     const recommendBtn = document.getElementById('recommendBtn');
     const recommendResult = document.getElementById('recommendResult');
 
@@ -115,7 +164,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 2. 과거 유사 사례 검증 리포트 모달 로직
     const verifyBtn = document.getElementById('verifyBtn');
     const verifyModal = document.getElementById('verifyModal');
     const closeModal = document.querySelector('.close-modal');
@@ -124,11 +172,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         verifyBtn.addEventListener('click', () => {
             verifyModal.classList.add('active');
         });
-
         closeModal.addEventListener('click', () => {
             verifyModal.classList.remove('active');
         });
-
         window.addEventListener('click', (e) => {
             if (e.target === verifyModal) {
                 verifyModal.classList.remove('active');
@@ -136,16 +182,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 3. 사이드바 메뉴 활성화 스위칭
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
-        item.addEventListener('click', function (e) {
-            navItems.forEach(nav => nav.classList.remove('active'));
-            this.classList.add('active');
-        });
-    });
-
-    // 4. 게이지 & 프로그레스바 초기 로딩 애니메이션
     const progressBar = document.querySelector('.progress-bar');
     if (progressBar) {
         const pWidth = progressBar.style.width;

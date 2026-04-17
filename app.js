@@ -358,8 +358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .upload(filePath, file);
 
                 if (uploadError) {
-                    console.error("스토리지 업로드 에러:", uploadError.message);
-                    throw new Error('파일 업로드 실패! (Supabase Storage 버킷이 없거나 권한이 없을 수 있습니다)');
+                    throw new Error('Storage 에러 상세: ' + uploadError.message);
                 }
 
                 // 2. 업로드된 파일의 접속 가능 URL 알아내기

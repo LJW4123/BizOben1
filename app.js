@@ -351,8 +351,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             fileUploadBtn.disabled = true;
 
             try {
-                // 1. Supabase Storage 에 파일 업로드
-                const filePath = `uploads/${Date.now()}_${file.name}`;
+                // 1. Supabase Storage 에 파일 업로드 (특수문자 및 공백 치환)
+                const safeName = file.name.replace(/[^a-zA-Z0-9가-힣.\-_]/g, '_');
+                const filePath = `uploads/${Date.now()}_${safeName}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('documents')
                     .upload(filePath, file);

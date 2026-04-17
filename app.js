@@ -37,7 +37,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="participant-item">
                             <div class="participant-info">
                                 <strong>${p.name || '알 수 없는 참여자'} (${p.manager_name || '-'})</strong>
-                                <span class="gauge-label">업무 이해도 ${p.understanding_level || 0}%</span>
+                                <div>
+                                    <span class="gauge-label">업무 이해도 ${p.understanding_level || 0}%</span>
+                                    <button class="btn-icon" style="color:var(--danger); margin-left:10px; font-size:12px; padding:2px;" onclick="deleteParticipant(${p.id})" title="참여자 삭제"><i class="fa-solid fa-trash"></i></button>
+                                </div>
                             </div>
                             <div class="gauge-container">
                                 <div class="gauge-bar" style="width: ${p.understanding_level || 0}%; background: ${colorVar};"></div>
@@ -56,6 +59,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = `<div style="padding:15px; color:var(--danger);">데이터 로드 실패: ${err.message || '알지 못하는 오류가 발생했습니다.'}</div>`;
         }
     }
+
+    // 전역 함수: 참여자 삭제
+    window.deleteParticipant = async (id) => {
+        if (!confirm('이 참여자를 정말 삭제하시겠습니까?')) return;
+        try {
+            await supabaseClient.from('participants').delete().eq('id', id);
+            await loadParticipants();
+        } catch (e) {
+            alert('삭제 오류: ' + e.message);
+        }
+    };
 
     // [DB 연동] 운영 맥락 파일 불러오기
     async function loadContextFiles() {
@@ -82,7 +96,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span class="file-name">${file.file_name}</span>
                                 <span class="file-memo">${file.memo || '...'}</span>
                             </div>
-                            <button class="btn-icon" title="다운로드" onclick="window.open('${file.file_url || '#'}', '_blank')"><i class="fa-solid fa-download"></i></button>
+                            <div style="display:flex; gap:5px;">
+                                <button class="btn-icon" title="다운로드" onclick="window.open('${file.file_url || '#'}', '_blank')"><i class="fa-solid fa-download"></i></button>
+                                <button class="btn-icon" title="삭제" style="color:var(--danger);" onclick="deleteContextFile(${file.id}, '${file.file_url || ''}')"><i class="fa-solid fa-trash"></i></button>
+                            </div>
                         </li>
                     `;
                     container.innerHTML += html;
@@ -94,6 +111,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.innerHTML = `<div style="padding:15px; color:var(--danger);">데이터 로드 실패: ${err.message || '알지 못하는 오류가 발생했습니다.'}</div>`;
         }
     }
+
+    // 전역 함수: 파일 목록 삭제
+    window.deleteContextFile = async (id, fileUrl) => {
+        if (!confirm('해당 문서와 파일 데이터를 삭제하시겠습니까?')) return;
+        try {
+            // 스토리지 파일 실제 삭제
+            if (fileUrl && fileUrl.includes('documents/')) {
+                const parts = fileUrl.split('documents/');
+                if (parts.length > 1) {
+                    const filePath = parts[1];
+                    await supabaseClient.storage.from('documents').remove([filePath]);
+                }
+            }
+            // DB 기록 삭제
+            await supabaseClient.from('context_files').delete().eq('id', id);
+            await loadContextFiles();
+        } catch (e) {
+            alert('삭제 오류: ' + e.message);
+        }
+    };
 
     // DB 데이터 로드 실행
     await loadParticipants();

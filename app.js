@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span class="file-name">${file.file_name}</span>
                                 <span class="file-memo">${file.memo || '...'}</span>
                             </div>
-                            <button class="btn-icon" title="다운로드"><i class="fa-solid fa-download"></i></button>
+                            <button class="btn-icon" title="다운로드" onclick="window.open('${file.file_url || '#'}', '_blank')"><i class="fa-solid fa-download"></i></button>
                         </li>
                     `;
                     container.innerHTML += html;
@@ -98,6 +98,273 @@ document.addEventListener('DOMContentLoaded', async () => {
     // DB 데이터 로드 실행
     await loadParticipants();
     await loadContextFiles();
+
+    // ----------------------------------------------------------------------
+    // [DB 통신] 업무 진행 현황 (전체 진행률 및 단계)
+    // ----------------------------------------------------------------------
+    async function loadProgressData() {
+        const container = document.getElementById('progressSectionContainer');
+        if (!container) return;
+
+        try {
+            // 테이블이 없을 경우를 대비한 안전한 조회
+            const [metaRes, stagesRes] = await Promise.all([
+                supabaseClient.from('project_metadata').select('*').eq('id', 1).maybeSingle(),
+                supabaseClient.from('progress_stages').select('*').order('step_order', { ascending: true })
+            ]);
+
+            const progressValue = metaRes.data ? metaRes.data.overall_progress : 0;
+            const stages = stagesRes.data || [];
+
+            // Stepper HTML 생성
+            let stepperHtml = '<div class="stepper">';
+            stages.forEach((stage, idx) => {
+                const isCompleted = stage.is_completed;
+                const stepClass = isCompleted ? 'completed' : (idx === stages.findIndex(s => !s.is_completed) ? 'active' : '');
+                const iconContent = isCompleted ? '<i class="fa-solid fa-check"></i>' : (idx + 1);
+
+                stepperHtml += `
+                    <div class="step ${stepClass}">
+                        <div class="step-icon">${iconContent}</div>
+                        <div class="step-label">${stage.name}</div>
+                        <div style="display:flex; gap:5px; margin-top:5px;">
+                            <button onclick="toggleStage(${stage.id}, ${!isCompleted})" style="border:none; background:none; color:var(--primary-color); cursor:pointer; font-size:12px;" title="상태 변경"><i class="fa-solid ${isCompleted ? 'fa-rotate-left' : 'fa-check'}"></i></button>
+                            <button onclick="deleteStage(${stage.id})" style="border:none; background:none; color:var(--danger); cursor:pointer; font-size:12px;" title="단계 삭제"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+
+                // 연결선 추가 (마지막 요소 전까지)
+                if (idx < stages.length - 1) {
+                    const nextCompleted = stages[idx + 1].is_completed;
+                    const lineClass = isCompleted ? (nextCompleted ? 'completed' : 'active') : '';
+                    stepperHtml += `<div class="step-line ${lineClass}"></div>`;
+                }
+            });
+            stepperHtml += '</div>';
+
+            container.innerHTML = `
+                <div class="progress-header">
+                    <span>전체 프로젝트 진행률</span>
+                    <span class="progress-percent">${progressValue}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: ${progressValue}%;"></div>
+                </div>
+                ${stages.length > 0 ? stepperHtml : '<div style="text-align:center; color:var(--text-muted);">현재 등록된 단계가 없습니다.</div>'}
+            `;
+
+        } catch (err) {
+            container.innerHTML = `<div style="color:var(--danger);">진행 현황 로드 실패: ${err.message}. SQL 테이블을 생성해주세요.</div>`;
+        }
+    }
+
+    // 단계 삭제 전역 함수
+    window.deleteStage = async (id) => {
+        if (!confirm('해당 단계를 완전히 삭제하시겠습니까?')) return;
+        await supabaseClient.from('progress_stages').delete().eq('id', id);
+        await loadProgressData();
+    };
+
+    // 단계 상태 변경 전역 함수
+    window.toggleStage = async (id, newStatus) => {
+        await supabaseClient.from('progress_stages').update({ is_completed: newStatus }).eq('id', id);
+        await loadProgressData();
+    };
+
+    const updateProgressBtn = document.getElementById('updateProgressBtn');
+    if (updateProgressBtn) {
+        updateProgressBtn.addEventListener('click', async () => {
+            const val = document.getElementById('overallProgressInput').value;
+            if (val === '') return alert('진행률(0-100)을 입력하세요.');
+
+            // 기존 레코드 검사 및 upsert (id:1)
+            const { error } = await supabaseClient.from('project_metadata').upsert({ id: 1, overall_progress: parseInt(val) });
+            if (error) return alert('진행률 업데이트 실패: ' + error.message);
+
+            document.getElementById('overallProgressInput').value = '';
+            await loadProgressData();
+        });
+    }
+
+    const addStageBtn = document.getElementById('addStageBtn');
+    if (addStageBtn) {
+        addStageBtn.addEventListener('click', async () => {
+            const name = document.getElementById('stageNameInput').value;
+            const completed = document.getElementById('stageCompletedCheck').checked;
+            if (!name) return alert('단계명을 입력하세요.');
+
+            const originalBtn = addStageBtn.innerHTML;
+            addStageBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            addStageBtn.disabled = true;
+
+            try {
+                // 제일 마지막 순서 가져오기
+                const { data } = await supabaseClient.from('progress_stages').select('step_order').order('step_order', { ascending: false }).limit(1);
+                let nextOrder = 1;
+                if (data && data.length > 0) nextOrder = data[0].step_order + 1;
+
+                const { error } = await supabaseClient.from('progress_stages').insert([{
+                    name: name,
+                    is_completed: completed,
+                    step_order: nextOrder
+                }]);
+
+                if (error) throw error;
+
+                document.getElementById('stageNameInput').value = '';
+                document.getElementById('stageCompletedCheck').checked = false;
+                await loadProgressData();
+            } catch (err) {
+                alert('단계 추가 실패: ' + err.message);
+            } finally {
+                addStageBtn.innerHTML = originalBtn;
+                addStageBtn.disabled = false;
+            }
+        });
+    }
+
+    await loadProgressData();
+
+    // ----------------------------------------------------------------------
+    // [DB 통신] 새 참여자 추가 로직
+    // ----------------------------------------------------------------------
+    const addParticipantBtn = document.getElementById('addParticipantBtn');
+    if (addParticipantBtn) {
+        addParticipantBtn.addEventListener('click', async () => {
+            const name = document.getElementById('partNameInput').value;
+            const manager = document.getElementById('partManagerInput').value;
+            const level = document.getElementById('partLevelInput').value || 0;
+            const history = document.getElementById('partHistoryCheck').checked;
+
+            if (!name) {
+                alert('기관명을 입력해주세요.');
+                return;
+            }
+
+            const originalBtn = addParticipantBtn.innerHTML;
+            addParticipantBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            addParticipantBtn.disabled = true;
+
+            try {
+                const { error } = await supabaseClient.from('participants').insert([{
+                    name: name,
+                    manager_name: manager,
+                    understanding_level: parseInt(level),
+                    history_checked: history
+                }]);
+
+                if (error) throw error;
+
+                // 폼 초기화
+                document.getElementById('partNameInput').value = '';
+                document.getElementById('partManagerInput').value = '';
+                document.getElementById('partLevelInput').value = '';
+                document.getElementById('partHistoryCheck').checked = false;
+
+                // 리스트 다시 불러오기
+                await loadParticipants();
+
+            } catch (err) {
+                alert('참여자 등록 에러: ' + err.message);
+            } finally {
+                addParticipantBtn.innerHTML = originalBtn;
+                addParticipantBtn.disabled = false;
+            }
+        });
+    }
+
+    // ----------------------------------------------------------------------
+    // [DB 통신] 파일 업로드 로직 (Storage + DB 연동)
+    // ----------------------------------------------------------------------
+    const fileUploadBox = document.getElementById('fileUploadBox');
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const fileUploadBtn = document.getElementById('fileUploadBtn');
+    const fileMemoInput = document.getElementById('fileMemoInput');
+
+    if (fileUploadBox && fileInput) {
+        fileUploadBox.addEventListener('click', () => {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileNameDisplay.textContent = e.target.files[0].name;
+                fileNameDisplay.style.color = "var(--primary-color)";
+                fileNameDisplay.style.fontWeight = "bold";
+            }
+        });
+    }
+
+    if (fileUploadBtn) {
+        fileUploadBtn.addEventListener('click', async () => {
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('업로드할 파일을 먼저 선택해주세요!');
+                return;
+            }
+            const file = fileInput.files[0];
+            const memo = fileMemoInput.value;
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            let fileType = 'other';
+            if (['pdf'].includes(fileExt)) fileType = 'pdf';
+            if (['doc', 'docx'].includes(fileExt)) fileType = 'word';
+
+            const originalHtml = fileUploadBtn.innerHTML;
+            fileUploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 업로드 중...';
+            fileUploadBtn.disabled = true;
+
+            try {
+                // 1. Supabase Storage 에 파일 업로드
+                const filePath = `uploads/${Date.now()}_${file.name}`;
+                const { data: uploadData, error: uploadError } = await supabaseClient.storage
+                    .from('documents')
+                    .upload(filePath, file);
+
+                if (uploadError) {
+                    console.error("스토리지 업로드 에러:", uploadError.message);
+                    throw new Error('파일 업로드 실패! (Supabase Storage 버킷이 없거나 권한이 없을 수 있습니다)');
+                }
+
+                // 2. 업로드된 파일의 접속 가능 URL 알아내기
+                const { data: publicUrlData } = supabaseClient.storage
+                    .from('documents')
+                    .getPublicUrl(filePath);
+
+                const fileUrl = publicUrlData.publicUrl;
+
+                // 3. 파일 메타데이터를 DB(context_files)에 저장하기
+                const { error: dbError } = await supabaseClient.from('context_files').insert([{
+                    file_name: file.name,
+                    memo: memo,
+                    file_type: fileType,
+                    file_url: fileUrl
+                }]);
+
+                if (dbError) {
+                    console.error('DB 저장 에러:', dbError.message);
+                    throw dbError;
+                }
+
+                alert('파일이 성공적으로 업로드 및 저장되었습니다!');
+
+                // 폼 초기화
+                fileInput.value = '';
+                fileMemoInput.value = '';
+                fileNameDisplay.textContent = '클릭하여 파일을 선택하세요';
+                fileNameDisplay.style.color = '';
+                fileNameDisplay.style.fontWeight = 'normal';
+
+                // 파일 리스트 다시 그리기
+                await loadContextFiles();
+
+            } catch (err) {
+                alert('업로드 오류: ' + err.message);
+            } finally {
+                fileUploadBtn.innerHTML = originalHtml;
+                fileUploadBtn.disabled = false;
+            }
+        });
+    }
 
 
     // ----------------------------------------------------------------------

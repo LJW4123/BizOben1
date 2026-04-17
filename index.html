@@ -45,35 +45,46 @@
                 <!-- 1. 업무 진행 현황 -->
                 <section id="progress" class="card full-width">
                     <h2><i class="fa-solid fa-list-check"></i> 업무 진행 현황</h2>
-                    <div class="progress-section">
-                        <div class="progress-header">
-                            <span>전체 프로젝트 진행률</span>
-                            <span class="progress-percent">65%</span>
-                        </div>
-                        <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: 65%;"></div>
-                        </div>
 
-                        <div class="stepper">
-                            <div class="step completed">
-                                <div class="step-icon"><i class="fa-solid fa-check"></i></div>
-                                <div class="step-label">기획</div>
+                    <!-- 진행 현황 조작 UI -->
+                    <div
+                        style="margin-bottom: 24px; padding: 16px; background: var(--secondary-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--primary-color);">전체 진행률 조절
+                                </h4>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="number" id="overallProgressInput" placeholder="0~100" min="0" max="100"
+                                        style="padding:10px; border: 1px solid var(--border-color); border-radius: 6px; width: 90px;">
+                                    <button id="updateProgressBtn" class="btn btn-primary"
+                                        style="padding: 10px 18px; font-size: 14px;">반영</button>
+                                </div>
                             </div>
-                            <div class="step-line completed"></div>
-                            <div class="step completed">
-                                <div class="step-icon"><i class="fa-solid fa-check"></i></div>
-                                <div class="step-label">매칭</div>
+
+                            <div style="flex: 2; min-width: 250px;">
+                                <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--primary-color);">새 업무 단계
+                                    추가</h4>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="text" id="stageNameInput" placeholder="단계명 (예: 사후관리)"
+                                        style="flex:1; padding:10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                                    <label
+                                        style="font-size: 14px; display:flex; align-items:center; gap:6px; margin: 0 10px;"><input
+                                            type="checkbox" id="stageCompletedCheck"
+                                            style="width:16px; height:16px; accent-color: var(--primary-color);"> 완료 상태
+                                        포함</label>
+                                    <button id="addStageBtn" class="btn btn-outline"
+                                        style="padding: 10px 18px; font-size: 14px;"><i class="fa-solid fa-plus"></i>
+                                        추가</button>
+                                </div>
                             </div>
-                            <div class="step-line active"></div>
-                            <div class="step active">
-                                <div class="step-icon">3</div>
-                                <div class="step-label">배송</div>
-                            </div>
-                            <div class="step-line"></div>
-                            <div class="step">
-                                <div class="step-icon">4</div>
-                                <div class="step-label">보고</div>
-                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="progress-section" id="progressSectionContainer">
+                        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            <i class="fa-solid fa-spinner fa-spin"></i> 진행 현황 로딩 중...
                         </div>
                     </div>
                 </section>
@@ -81,6 +92,27 @@
                 <!-- 2. 참여자 얼라인 -->
                 <section id="alignment" class="card">
                     <h2><i class="fa-solid fa-users-gear"></i> 참여자 얼라인</h2>
+
+                    <!-- 새 참여자 등록 UI -->
+                    <div
+                        style="margin-bottom: 24px; padding: 16px; background: var(--secondary-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 12px; font-size: 14px; color: var(--primary-color);">새 참여자 등록</h4>
+                        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <input type="text" id="partNameInput" placeholder="기관명 (예: C 복지재단)"
+                                style="flex:1; padding:10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <input type="text" id="partManagerInput" placeholder="담당자명 (예: 김사업)"
+                                style="flex:1; padding:10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <input type="number" id="partLevelInput" placeholder="이해도(0-100)" min="0" max="100"
+                                style="width:120px; padding:10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <label
+                                style="font-size: 14px; display:flex; align-items:center; gap:6px; margin: 0 10px;"><input
+                                    type="checkbox" id="partHistoryCheck"
+                                    style="width:16px; height:16px; accent-color: var(--primary-color);"> 이력 확인</label>
+                            <button id="addParticipantBtn" class="btn btn-primary"
+                                style="padding: 10px 18px; font-size: 14px;"><i class="fa-solid fa-plus"></i>
+                                추가</button>
+                        </div>
+                    </div>
                     <div class="participant-list" id="participantListContainer">
                         <div style="text-align: center; padding: 20px; color: var(--text-muted);">
                             <i class="fa-solid fa-spinner fa-spin"></i> 데이터 베이스 접속 중...
@@ -130,13 +162,15 @@
                         <div class="upload-section">
                             <div class="form-group">
                                 <label>판단 근거 메모</label>
-                                <textarea placeholder="이 파일에 대한 판단 근거나 주요 맥락을 기록하세요..."></textarea>
+                                <textarea id="fileMemoInput" placeholder="이 파일에 대한 판단 근거나 주요 맥락을 기록하세요..."></textarea>
                             </div>
-                            <div class="file-upload-box">
+                            <div class="file-upload-box" id="fileUploadBox">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>클릭하거나 파일을 드래그하여 업로드하세요</p>
+                                <p id="fileNameDisplay">클릭하여 파일을 선택하세요</p>
+                                <input type="file" id="fileInput" style="display:none;" />
                             </div>
-                            <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">운영 맥락 저장하기</button>
+                            <button id="fileUploadBtn" class="btn btn-primary" style="width: 100%; margin-top: 15px;"><i
+                                    class="fa-solid fa-upload"></i> 운영 맥락 파일 저장</button>
                         </div>
                         <div class="file-list-section">
                             <h3>저장된 문서 (판단 근거 포함)</h3>

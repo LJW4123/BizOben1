@@ -351,9 +351,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             fileUploadBtn.disabled = true;
 
             try {
-                // 1. Supabase Storage 에 파일 업로드 (특수문자 및 공백 치환)
-                const safeName = file.name.replace(/[^a-zA-Z0-9가-힣.\-_]/g, '_');
-                const filePath = `uploads/${Date.now()}_${safeName}`;
+                // 1. Supabase Storage 에 파일 업로드 (한글/특수문자 에러 원천 차단 무작위 난수화)
+                const randomStr = Math.random().toString(36).substring(2, 10);
+                const safeName = `${Date.now()}_${randomStr}.${fileExt}`;
+                const filePath = `uploads/${safeName}`;
                 const { data: uploadData, error: uploadError } = await supabaseClient.storage
                     .from('documents')
                     .upload(filePath, file);

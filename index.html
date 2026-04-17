@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비즈오벤(BizOben) - 다자 협업 운영 관리 솔루션</title>
+    <!-- Google Fonts: Noto Sans KR for professional typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fa-solid fa-cube"></i>
+                <span>BizOben</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#dashboard" class="nav-item active"><i class="fa-solid fa-chart-line"></i>대시보드</a>
+                <a href="#context" class="nav-item"><i class="fa-solid fa-folder-open"></i>운영 맥락 저장소</a>
+                <a href="#alignment" class="nav-item"><i class="fa-solid fa-users-gear"></i>참여자 얼라인</a>
+                <a href="#recommendation" class="nav-item"><i class="fa-solid fa-hand-holding-heart"></i>물품/수혜자 추천</a>
+                <a href="#progress" class="nav-item"><i class="fa-solid fa-list-check"></i>업무 진행 현황</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-header">
+                <h1>다자 협업 운영 관리 대시보드</h1>
+                <div class="user-profile">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=1A365D&color=fff" alt="User Avatar">
+                    <span>최고 관리자</span>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+
+                <!-- 1. 업무 진행 현황 -->
+                <section id="progress" class="card full-width">
+                    <h2><i class="fa-solid fa-list-check"></i> 업무 진행 현황</h2>
+                    <div class="progress-section">
+                        <div class="progress-header">
+                            <span>전체 프로젝트 진행률</span>
+                            <span class="progress-percent">65%</span>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: 65%;"></div>
+                        </div>
+
+                        <div class="stepper">
+                            <div class="step completed">
+                                <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                                <div class="step-label">기획</div>
+                            </div>
+                            <div class="step-line completed"></div>
+                            <div class="step completed">
+                                <div class="step-icon"><i class="fa-solid fa-check"></i></div>
+                                <div class="step-label">매칭</div>
+                            </div>
+                            <div class="step-line active"></div>
+                            <div class="step active">
+                                <div class="step-icon">3</div>
+                                <div class="step-label">배송</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step">
+                                <div class="step-icon">4</div>
+                                <div class="step-label">보고</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. 참여자 얼라인 -->
+                <section id="alignment" class="card">
+                    <h2><i class="fa-solid fa-users-gear"></i> 참여자 얼라인</h2>
+                    <div class="participant-list" id="participantListContainer">
+                        <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                            <i class="fa-solid fa-spinner fa-spin"></i> 데이터 베이스 접속 중...
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. 물품 및 수혜자 추천 -->
+                <section id="recommendation" class="card">
+                    <h2><i class="fa-solid fa-hand-holding-heart"></i> 물품/수혜자 AI 추천</h2>
+                    <div class="recommendation-form">
+                        <div class="form-group">
+                            <label>가용 예산 (원)</label>
+                            <input type="number" id="budgetInput" placeholder="예산을 입력하세요 (예: 50000000)"
+                                value="50000000">
+                        </div>
+                        <button id="recommendBtn" class="btn btn-primary"><i
+                                class="fa-solid fa-wand-magic-sparkles"></i> AI 추천 받기</button>
+                    </div>
+
+                    <div id="recommendResult" class="recommendation-result hidden">
+                        <div class="result-card">
+                            <div class="result-header">
+                                <h3>추천 매칭 결과</h3>
+                                <span class="badge">매칭률 98%</span>
+                            </div>
+                            <div class="result-body">
+                                <p><strong>추천 대상:</strong> 홀몸 어르신 100명</p>
+                                <p><strong>추천 물품:</strong> 온열 매트 50개, 프리미엄 방한복 50벌</p>
+                                <div class="reason-box">
+                                    <strong><i class="fa-solid fa-lightbulb"></i> 추천 사유:</strong> 기업 ESG 기조(지역사회 상생 및
+                                    친환경) 부합성 높음. 겨울철 취약계층의 실질적 필요에 부합.
+                                </div>
+                            </div>
+                            <div class="result-actions">
+                                <button id="verifyBtn" class="btn btn-outline"><i
+                                        class="fa-solid fa-magnifying-glass-chart"></i> 과거 유사 사례 확인</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. 운영 맥락 저장소 -->
+                <section id="context" class="card full-width">
+                    <h2><i class="fa-solid fa-folder-open"></i> 운영 맥락 저장소</h2>
+                    <div class="context-container">
+                        <div class="upload-section">
+                            <div class="form-group">
+                                <label>판단 근거 메모</label>
+                                <textarea placeholder="이 파일에 대한 판단 근거나 주요 맥락을 기록하세요..."></textarea>
+                            </div>
+                            <div class="file-upload-box">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>클릭하거나 파일을 드래그하여 업로드하세요</p>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%; margin-top: 15px;">운영 맥락 저장하기</button>
+                        </div>
+                        <div class="file-list-section">
+                            <h3>저장된 문서 (판단 근거 포함)</h3>
+                            <ul class="file-list" id="fileListContainer">
+                                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                                    <i class="fa-solid fa-spinner fa-spin"></i> 파일 목록 로딩 중...
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- 5. 과거 사례 검증 모달 -->
+    <div id="verifyModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>과거 유사 사례 검증 리포트</h2>
+            <div class="modal-body">
+                <div class="case-card">
+                    <h4>24년 B사 혹한기 지원 사업</h4>
+                    <p><strong>지원 내용:</strong> 홀몸 어르신 겨울방한용품(온열매트) 지원</p>
+                    <p><strong>수혜자 만족도:</strong> <span class="highlight-text">95%</span> (매우 만족)</p>
+                    <hr style="margin:10px 0; border:0; border-top:1px solid #E2E8F0;">
+                    <p><strong>운영 인사이트:</strong> 배송 지연 문제가 일부 있었으나, 물품 자체의 질적 만족도는 매우 높았음. 선제적인 물류 파트너 얼라인먼트가 필요함.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase DB 연동용 라이브러리 추가 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

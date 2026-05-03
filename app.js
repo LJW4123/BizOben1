@@ -410,8 +410,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ----------------------------------------------------------------------
     const navItems = document.querySelectorAll('.nav-item');
     const sections = {
-        '#dashboard': ['progress', 'alignment', 'recommendation', 'context'],
-        '#context': ['context'],
+        '#dashboard': ['progress', 'alignment', 'recommendation', 'api-storage', 'reports'],
+        '#api-storage': ['api-storage'],
+        '#reports': ['reports'],
         '#alignment': ['alignment'],
         '#recommendation': ['recommendation'],
         '#progress': ['progress']
@@ -495,4 +496,86 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressBar.style.width = pWidth;
         }, 500);
     }
+
+    // ----------------------------------------------------------------------
+    // [Mock Data] API 데이터 저장소 & 생성 리포트 데이터 로드
+    // ----------------------------------------------------------------------
+    function loadApiStorageData() {
+        const listBody = document.getElementById('apiDataListBody');
+        if (!listBody) return;
+
+        const mockData = [
+            { company: '(주)테크솔루션', manager: '홍*동', phone: '010-12**-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:30:21', color: 'high' },
+            { company: '미래바이오(주)', manager: '김*영', phone: '010-23**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:29:58', color: 'medium' },
+            { company: '스카이엔지니어링', manager: '이*준', phone: '010-34**-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:28:47', color: 'low' },
+            { company: '(주)그린에너지', manager: '박*민', phone: '010-45**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:27:13', color: 'medium' },
+            { company: '넥스트피아(주)', manager: '최*아', phone: '010-56**-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:25:39', color: 'high' },
+            { company: '하이퍼커넥트', manager: '정*훈', phone: '010-67**-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:24:02', color: 'low' },
+            { company: '에이플러스랩', manager: '오*린', phone: '010-78**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:22:18', color: 'medium' },
+        ];
+
+        listBody.innerHTML = mockData.map(item => `
+            <tr style="cursor:pointer;" onclick="updateApiPreview('${item.company}', '${item.manager}')">
+                <td>${item.company}</td>
+                <td>${item.manager}</td>
+                <td>${item.phone}</td>
+                <td><span class="status-badge status-done">${item.status}</span></td>
+                <td><span class="importance-tag importance-${item.color}">${item.importance}</span></td>
+                <td style="font-size:12px; color:var(--text-muted);">${item.date}</td>
+            </tr>
+        `).join('');
+    }
+
+    function loadReportData() {
+        const listBody = document.getElementById('reportListBody');
+        if (!listBody) return;
+
+        const mockReports = [
+            { name: '기업 사회공헌 운영 리포트.pdf', base: '기업정보, 담당자, 수혜자ID', date: '2025-05-23 14:40', format: 'PDF', status: '완료' },
+            { name: '취약계층 지원 현황 요약.xlsx', base: '수혜자ID, 업무진행, 마스킹데이터', date: '2025-05-23 13:25', format: 'XLSX', status: '완료' },
+            { name: '기관별 협업 이슈 분석 리포트.pdf', base: 'API 연동, 협업이슈, 업무진행', date: '2025-05-22 17:08', format: 'PDF', status: '완료' },
+            { name: 'ESG 활동 증빙용 요약본.pdf', base: '기업정보, 업무진행, 리포트자료', date: '2025-05-22 11:45', format: 'PDF', status: '완료' },
+            { name: '지원 대상자 마스킹 데이터 리포트.xlsx', base: '마스킹데이터, 수혜자ID', date: '2025-05-21 16:32', format: 'XLSX', status: '완료' },
+        ];
+
+        listBody.innerHTML = mockReports.map(report => `
+            <tr style="cursor:pointer;" onclick="updateReportPreview('${report.name}')">
+                <td style="font-weight:600;"><i class="fa-solid fa-file-${report.format === 'PDF' ? 'pdf' : 'excel'}" style="color:${report.format === 'PDF' ? 'var(--danger)' : 'var(--success)'}; margin-right:8px;"></i>${report.name}</td>
+                <td style="font-size:13px;">${report.base}</td>
+                <td style="font-size:13px;">${report.date}</td>
+                <td><span class="badge" style="background:var(--secondary-bg); color:var(--primary-light);">${report.format}</span></td>
+                <td><span class="status-badge status-done">${report.status}</span></td>
+                <td>
+                    <button class="btn-icon" title="미리보기"><i class="fa-solid fa-eye"></i></button>
+                    <button class="btn-icon" title="다운로드"><i class="fa-solid fa-download"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.updateApiPreview = (company, manager) => {
+        const jsonBlock = document.getElementById('jsonPreview');
+        const detailValue = document.querySelector('#apiDataDetail .detail-value');
+        
+        // Mock JSON update
+        const mockJson = {
+            "companyName": company,
+            "contactName": manager,
+            "phone": "010-****-****",
+            "email": manager === '홍*동' ? "j***@techsol.co.kr" : "contact@masked.com",
+            "address": "서울시 **구 **로 **길 **",
+            "beneficiaryId": "BEN-2026-****",
+            "businessNumber": "12*-**-*****"
+        };
+        
+        jsonBlock.textContent = JSON.stringify(mockJson, null, 2);
+    };
+
+    window.updateReportPreview = (name) => {
+        const previewName = document.getElementById('previewReportName');
+        if (previewName) previewName.textContent = name;
+    };
+
+    loadApiStorageData();
+    loadReportData();
 });

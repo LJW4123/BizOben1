@@ -23,7 +23,8 @@
             </div>
             <nav class="nav-menu">
                 <a href="#dashboard" class="nav-item active"><i class="fa-solid fa-chart-line"></i>대시보드</a>
-                <a href="#context" class="nav-item"><i class="fa-solid fa-folder-open"></i>운영 맥락 저장소</a>
+                <a href="#api-storage" class="nav-item"><i class="fa-solid fa-database"></i>API 데이터 저장소</a>
+                <a href="#reports" class="nav-item"><i class="fa-solid fa-file-contract"></i>생성 리포트</a>
                 <a href="#alignment" class="nav-item"><i class="fa-solid fa-users-gear"></i>참여자 얼라인</a>
                 <a href="#recommendation" class="nav-item"><i class="fa-solid fa-hand-holding-heart"></i>물품/수혜자 추천</a>
                 <a href="#progress" class="nav-item"><i class="fa-solid fa-list-check"></i>업무 진행 현황</a>
@@ -155,31 +156,195 @@
                     </div>
                 </section>
 
-                <!-- 4. 운영 맥락 저장소 -->
-                <section id="context" class="card full-width">
-                    <h2><i class="fa-solid fa-folder-open"></i> 운영 맥락 저장소</h2>
-                    <div class="context-container">
-                        <div class="upload-section">
-                            <div class="form-group">
-                                <label>판단 근거 메모</label>
-                                <textarea id="fileMemoInput" placeholder="이 파일에 대한 판단 근거나 주요 맥락을 기록하세요..."></textarea>
+                <!-- 4. API 연동 데이터 저장소 -->
+                <section id="api-storage" class="card full-width hidden">
+                    <div class="section-header-group">
+                        <h2><i class="fa-solid fa-database"></i> API 연동 데이터 저장소</h2>
+                        <p class="section-desc">외부 API로부터 수집한 기업 데이터를 마스킹하여 안전하게 저장하고 관리합니다.</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="stat-cards-container">
+                        <div class="stat-card">
+                            <div class="stat-icon success"><i class="fa-solid fa-circle-check"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">1,256 건</span>
+                                <span class="stat-label">API 연동 완료</span>
                             </div>
-                            <div class="file-upload-box" id="fileUploadBox">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p id="fileNameDisplay">클릭하여 파일을 선택하세요</p>
-                                <input type="file" id="fileInput" style="display:none;" />
-                            </div>
-                            <button id="fileUploadBtn" class="btn btn-primary" style="width: 100%; margin-top: 15px;"><i
-                                    class="fa-solid fa-upload"></i> 운영 맥락 파일 저장</button>
                         </div>
-                        <div class="file-list-section">
-                            <h3>저장된 문서 (판단 근거 포함)</h3>
-                            <ul class="file-list" id="fileListContainer">
-                                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                                    <i class="fa-solid fa-spinner fa-spin"></i> 파일 목록 로딩 중...
+                        <div class="stat-card">
+                            <div class="stat-icon success"><i class="fa-solid fa-shield-halved"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">1,256 건</span>
+                                <span class="stat-label">개인정보 마스킹 완료</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon success"><i class="fa-solid fa-server"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">1,256 건</span>
+                                <span class="stat-label">DB 저장 완료</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-layout">
+                        <!-- Left: Data List -->
+                        <div class="data-table-container">
+                            <div class="table-header-actions">
+                                <h3>저장된 데이터 목록</h3>
+                                <div class="table-filters">
+                                    <input type="text" placeholder="기업명, 담당자 검색..." class="search-input">
                                 </div>
-                            </ul>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>기업명</th>
+                                        <th>담당자</th>
+                                        <th>연락처</th>
+                                        <th>상태</th>
+                                        <th>중요도</th>
+                                        <th>저장일시</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="apiDataListBody">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                            <div class="pagination">
+                                <span class="pagination-info">1 - 10 / 1,256 건</span>
+                                <div class="page-numbers">
+                                    <span class="page-btn active">1</span>
+                                    <span class="page-btn">2</span>
+                                    <span class="page-btn">3</span>
+                                    <span class="page-btn">4</span>
+                                    <span class="page-btn">5</span>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Right: Detail Panel -->
+                        <aside class="side-panel">
+                            <h3>저장 상세 정보 <span class="badge">선택된 데이터</span></h3>
+                            <div id="apiDataDetail">
+                                <div class="detail-group">
+                                    <span class="detail-label"><i class="fa-solid fa-link"></i> 데이터 출처 (API)</span>
+                                    <span class="detail-value">기업정보 API v2.1</span>
+                                </div>
+                                <div class="detail-group">
+                                    <span class="detail-label"><i class="fa-solid fa-mask"></i> 마스킹 규칙 적용 여부</span>
+                                    <span class="detail-value">적용됨 <i class="fa-solid fa-circle-check" style="color:var(--success)"></i></span>
+                                </div>
+                                <div class="detail-group">
+                                    <span class="detail-label"><i class="fa-solid fa-database"></i> 저장 위치</span>
+                                    <span class="detail-value">BizOben DB (Encrypted)</span>
+                                </div>
+                                <div class="detail-group">
+                                    <span class="detail-label"><i class="fa-solid fa-clock"></i> 마지막 동기화 시각</span>
+                                    <span class="detail-value">2025-05-23 14:30:21</span>
+                                </div>
+
+                                <div class="json-preview-container">
+                                    <span class="detail-label">마스킹 데이터 미리보기 (JSON)</span>
+                                    <pre class="json-block" id="jsonPreview">
+{
+  "companyName": "(주)테크솔루션",
+  "contactName": "홍*동",
+  "phone": "010-12**-****",
+  "email": "j***@techsol.co.kr",
+  "address": "서울시 강남구 **로 **길 **",
+  "beneficiaryId": "BEN-2026-****",
+  "businessNumber": "12*-**-*****"
+}
+                                    </pre>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <!-- 5. 생성 리포트 -->
+                <section id="reports" class="card full-width hidden">
+                    <div class="section-header-group">
+                        <h2><i class="fa-solid fa-file-contract"></i> 생성 리포트</h2>
+                        <p class="section-desc">저장된 마스킹 기업 데이터를 바탕으로 자동 생성된 리포트를 다운로드할 수 있습니다.</p>
+                    </div>
+
+                    <!-- Summary Cards -->
+                    <div class="stat-cards-container">
+                        <div class="stat-card">
+                            <div class="stat-icon primary"><i class="fa-solid fa-file-pdf"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">46 건</span>
+                                <span class="stat-label">생성 완료 리포트</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon success"><i class="fa-solid fa-download"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">42 건</span>
+                                <span class="stat-label">다운로드 가능</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon warning"><i class="fa-solid fa-rotate"></i></div>
+                            <div class="stat-info">
+                                <span class="stat-value">2025-05-23</span>
+                                <span class="stat-label">최근 업데이트</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page-layout">
+                        <!-- Left: Report List -->
+                        <div class="data-table-container">
+                            <div class="table-header-actions">
+                                <h3>리포트 목록</h3>
+                                <div class="table-filters">
+                                    <button class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> 새 리포트 생성</button>
+                                </div>
+                            </div>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>파일명</th>
+                                        <th>생성 기준 데이터</th>
+                                        <th>생성일시</th>
+                                        <th>형식</th>
+                                        <th>상태</th>
+                                        <th>작업</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportListBody">
+                                    <!-- Dynamic Content -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Right: Preview Panel -->
+                        <aside class="side-panel">
+                            <h3>리포트 미리보기 <span class="status-badge status-done">완료</span></h3>
+                            <div id="reportPreviewContent">
+                                <div class="detail-group">
+                                    <span class="detail-label">리포트명</span>
+                                    <span class="detail-value" id="previewReportName">기업 사회공헌 운영 리포트.pdf</span>
+                                </div>
+                                <div class="report-preview-box">
+                                    <div class="report-preview-header">
+                                        <h4 style="font-size:14px;">기업 사회공헌 운영 리포트</h4>
+                                        <p style="font-size:11px; color:var(--text-muted);">1. 운영 개요</p>
+                                    </div>
+                                    <div class="preview-chart-placeholder">
+                                        <i class="fa-solid fa-chart-pie" style="font-size:40px; color:var(--primary-light); opacity:0.5;"></i>
+                                    </div>
+                                    <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
+                                        <button class="btn btn-primary" style="width:100%;"><i class="fa-solid fa-file-pdf"></i> PDF 다운로드</button>
+                                        <button class="btn btn-outline" style="width:100%; font-size:13px;">원본 데이터 보기</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
                     </div>
                 </section>
 

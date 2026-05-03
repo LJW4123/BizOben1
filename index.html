@@ -323,10 +323,11 @@
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon warning"><i class="fa-solid fa-rotate"></i></div>
+                            <div class="stat-icon warning" style="background:rgba(245, 158, 11, 0.1); color:var(--warning);"><i class="fa-solid fa-clock-rotate-left"></i></div>
                             <div class="stat-info">
-                                <span class="stat-value">2025-05-23</span>
-                                <span class="stat-label">최근 업데이트</span>
+                                <span class="stat-label" style="font-weight:700; color:var(--text-main);">최근 업데이트 / 총 건수</span>
+                                <span class="stat-value">2025-05-23 <span style="font-size:14px; font-weight:400; color:var(--text-muted); margin-left:8px;">(총 128건)</span></span>
+                                <span class="stat-subtext" style="font-size:12px; color:var(--text-muted);">실시간 자동 동기화 중</span>
                             </div>
                         </div>
                     </div>
@@ -357,26 +358,55 @@
                             </table>
                         </div>
 
-                        <!-- Right: Preview Panel -->
-                        <aside class="side-panel">
-                            <h3>리포트 미리보기 <span class="status-badge status-done">완료</span></h3>
-                            <div id="reportPreviewContent">
-                                <div class="detail-group">
-                                    <span class="detail-label">리포트명</span>
-                                    <span class="detail-value" id="previewReportName">기업 사회공헌 운영 리포트.pdf</span>
+                        <!-- Right: Report Preview Panel -->
+                        <aside class="side-panel" style="width:450px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <h3 style="margin-bottom:0;">리포트 미리보기</h3>
+                                <span class="status-badge status-done" style="font-size:10px;">v1.0.4</span>
+                            </div>
+                            
+                            <div id="reportPreviewDetail" class="report-preview-box" style="height:auto; min-height:600px; background:white; border: 1px solid var(--border-color); border-radius:12px; padding:20px;">
+                                <div class="report-preview-header" style="background:var(--secondary-bg); padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid var(--border-color);">
+                                    <h4 id="previewReportName" style="font-size:16px; color:var(--primary-color); margin-bottom:12px; font-weight:700;">리포트를 선택해주세요</h4>
+                                    <div class="preview-meta-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:11px;">
+                                        <div><span style="color:var(--text-muted);">생성 기준:</span> <span id="previewBase" style="font-weight:600;">-</span></div>
+                                        <div><span style="color:var(--text-muted);">포함 항목:</span> <span id="previewItems" style="font-weight:600;">-</span></div>
+                                        <div><span style="color:var(--text-muted);">생성 일시:</span> <span id="previewDate" style="font-weight:600;">-</span></div>
+                                        <div><span style="color:var(--text-muted);">보안 상태:</span> <span id="previewSecurity" style="background:#EBFDF5; color:#10B981; padding:1px 5px; border-radius:4px;">정상 <i class="fa-solid fa-check" style="font-size:9px;"></i></span></div>
+                                    </div>
                                 </div>
-                                <div class="report-preview-box">
-                                    <div class="report-preview-header">
-                                        <h4 style="font-size:14px;">기업 사회공헌 운영 리포트</h4>
-                                        <p style="font-size:11px; color:var(--text-muted);">1. 운영 개요</p>
+
+                                <div class="report-preview-body">
+                                    <div style="border-left:3px solid var(--primary-light); padding-left:12px; margin-bottom:15px;">
+                                        <h5 style="font-size:13px; color:var(--text-main); margin-bottom:5px;">[ 요약 분석 보고 ]</h5>
+                                        <p id="previewSummary" style="font-size:12px; line-height:1.6; color:var(--text-muted);">
+                                            리포트를 선택하면 AI가 분석한 데이터 요약 정보와 실시간 통계 수치가 이곳에 렌더링됩니다.
+                                        </p>
                                     </div>
-                                    <div class="preview-chart-placeholder">
-                                        <i class="fa-solid fa-chart-pie" style="font-size:40px; color:var(--primary-light); opacity:0.5;"></i>
+
+                                    <div class="preview-chart-container" style="background:#F8FAFC; border:1px solid var(--border-color); border-radius:8px; padding:15px; margin-bottom:15px; height:180px; display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                                        <!-- Mock Chart Placeholder -->
+                                        <div style="display:flex; align-items:flex-end; gap:10px; height:100px;">
+                                            <div style="width:20px; background:var(--primary-light); height:70%; border-radius:3px 3px 0 0;"></div>
+                                            <div style="width:20px; background:var(--primary-color); height:95%; border-radius:3px 3px 0 0;"></div>
+                                            <div style="width:20px; background:var(--success); height:55%; border-radius:3px 3px 0 0;"></div>
+                                            <div style="width:20px; background:var(--warning); height:35%; border-radius:3px 3px 0 0;"></div>
+                                            <div style="width:20px; background:var(--primary-light); height:85%; border-radius:3px 3px 0 0;"></div>
+                                        </div>
+                                        <div style="margin-top:10px; font-size:11px; color:var(--text-muted);">주요 지표 분포 (AI 분석 기반)</div>
                                     </div>
-                                    <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
-                                        <button class="btn btn-primary" style="width:100%;"><i class="fa-solid fa-file-pdf"></i> PDF 다운로드</button>
-                                        <button class="btn btn-outline" style="width:100%; font-size:13px;">원본 데이터 보기</button>
+
+                                    <div style="background:#F0F9FF; border:1px solid #BAE6FD; padding:12px; border-radius:8px;">
+                                        <h5 style="font-size:12px; color:#0369A1; margin-bottom:4px;"><i class="fa-solid fa-lightbulb"></i> 인사이트 제언</h5>
+                                        <p id="previewInsight" style="font-size:11px; color:#0C4A6E; line-height:1.5;">
+                                            현재 참여자 얼라인먼트 점수가 평균 92%로 매우 안정적입니다. 다음 단계로의 업무 이행을 권장합니다.
+                                        </p>
                                     </div>
+                                </div>
+
+                                <div class="report-preview-footer" style="margin-top:25px; border-top:1px solid var(--border-color); padding-top:15px; display:flex; gap:8px;">
+                                    <button class="btn btn-outline btn-sm" style="flex:1; font-size:12px;"><i class="fa-solid fa-print"></i> 인쇄</button>
+                                    <button class="btn btn-primary btn-sm" style="flex:1; font-size:12px;"><i class="fa-solid fa-file-pdf"></i> PDF 다운로드</button>
                                 </div>
                             </div>
                         </aside>

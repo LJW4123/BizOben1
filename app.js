@@ -549,15 +549,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!listBody) return;
 
         const mockReports = [
-            { name: '기업 사회공헌 운영 리포트.pdf', base: '기업정보, 담당자, 수혜자ID', date: '2025-05-23 14:40', format: 'PDF', status: '완료' },
-            { name: '취약계층 지원 현황 요약.xlsx', base: '수혜자ID, 업무진행, 마스킹데이터', date: '2025-05-23 13:25', format: 'XLSX', status: '완료' },
-            { name: '기관별 협업 이슈 분석 리포트.pdf', base: 'API 연동, 협업이슈, 업무진행', date: '2025-05-22 17:08', format: 'PDF', status: '완료' },
-            { name: 'ESG 활동 증빙용 요약본.pdf', base: '기업정보, 업무진행, 리포트자료', date: '2025-05-22 11:45', format: 'PDF', status: '완료' },
-            { name: '지원 대상자 마스킹 데이터 리포트.xlsx', base: '마스킹데이터, 수혜자ID', date: '2025-05-21 16:32', format: 'XLSX', status: '완료' },
+            { id: 1, name: '기업 사회공헌 운영 리포트.pdf', base: '기업정보, 담당자, 수혜자ID', items: '마스킹 데이터, 매칭 점수, 운영 인사이트', date: '2025-05-23 14:40', format: 'PDF', status: '완료' },
+            { id: 2, name: '취약계층 지원 현황 요약.xlsx', base: '수혜자ID, 업무진행, 마스킹데이터', items: '지역별 분포, 지원 물품 리스트, 마스킹 일지', date: '2025-05-23 13:25', format: 'XLSX', status: '완료' },
+            { id: 3, name: '기관별 협업 이슈 분석 리포트.pdf', base: 'API 연동, 협업이슈, 업무진행', items: '이슈 트래킹, 해결 현황, 참여자 얼라인 점수', date: '2025-05-22 17:08', format: 'PDF', status: '완료' },
+            { id: 4, name: 'ESG 활동 증빙용 요약본.pdf', base: '기업정보, 업무진행, 리포트자료', items: '탄소 절감 효과, 사회적 가치 지표, 증빙 사진', date: '2025-05-22 11:45', format: 'PDF', status: '완료' },
+            { id: 5, name: '지원 대상자 마스킹 데이터 리포트.xlsx', base: '마스킹데이터, 수혜자ID', items: '개인정보 비식별화 내역, 접근 로그, 보안 감사', date: '2025-05-21 16:32', format: 'XLSX', status: '완료' },
         ];
 
         listBody.innerHTML = mockReports.map(report => `
-            <tr style="cursor:pointer;" onclick="updateReportPreview('${report.name}')">
+            <tr style="cursor:pointer;" onclick="updateReportPreview(${JSON.stringify(report).replace(/"/g, '&quot;')})">
                 <td style="font-weight:600;"><i class="fa-solid fa-file-${report.format === 'PDF' ? 'pdf' : 'excel'}" style="color:${report.format === 'PDF' ? 'var(--danger)' : 'var(--success)'}; margin-right:8px;"></i>${report.name}</td>
                 <td style="font-size:13px;">${report.base}</td>
                 <td style="font-size:13px;">${report.date}</td>
@@ -588,9 +588,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         jsonBlock.textContent = JSON.stringify(mockJson, null, 2);
     };
 
-    window.updateReportPreview = (name) => {
+    window.updateReportPreview = (report) => {
         const previewName = document.getElementById('previewReportName');
-        if (previewName) previewName.textContent = name;
+        const previewBase = document.getElementById('previewBase');
+        const previewItems = document.getElementById('previewItems');
+        const previewDate = document.getElementById('previewDate');
+        const previewSummary = document.getElementById('previewSummary');
+        const previewInsight = document.getElementById('previewInsight');
+
+        if (previewName) previewName.textContent = report.name;
+        if (previewBase) previewBase.textContent = report.base;
+        if (previewItems) previewItems.textContent = report.items;
+        if (previewDate) previewDate.textContent = report.date;
+
+        if (report.id === 1) {
+            previewSummary.textContent = "본 리포트는 최근 3개월간의 기업 사회공헌 활동 데이터를 종합 분석한 결과입니다. 참여 기관 간의 협업 효율성이 전 분기 대비 15% 상승하였으며, 특히 수혜자 만족도 지표에서 98점을 기록하며 매우 긍정적인 성과를 보였습니다.";
+            previewInsight.textContent = "현재의 협업 모델을 타 지역 사업으로 확장할 것을 제언합니다. 다만, 일부 마스킹 데이터의 업데이트 주기를 24시간에서 12시간으로 단축할 필요가 있습니다.";
+        } else if (report.id === 3) {
+            previewSummary.textContent = "기관별 협업 이슈를 분석한 결과, API 연동 과정에서의 지연 사례가 3건 발견되었습니다. 이에 따른 업무 지연 시간은 총 12시간으로 추산되며, 현재는 모든 이슈가 해결되어 정상 가동 중입니다.";
+            previewInsight.textContent = "네트워크 보안 정책 업데이트로 인한 일시적 단절이 주원인이었습니다. 향후 정기 점검 시간을 참여사들에게 사전 공지하는 프로세스 정립이 필요합니다.";
+        } else {
+            previewSummary.textContent = `${report.name} 리포트에 대한 AI 요약 분석 결과입니다. 해당 리포트는 ${report.base}를 기준으로 생성되었으며, ${report.items} 항목을 포함하고 있습니다. 데이터 무결성 검사 결과 100% 일치함을 확인하였습니다.`;
+            previewInsight.textContent = "데이터 보안 상태가 양호하며, 생성된 리포트의 규격이 ESG 공시 기준을 충족하고 있습니다. 즉시 외부 공개 또는 증빙 자료로 활용 가능합니다.";
+        }
     };
 
     loadApiStorageData();

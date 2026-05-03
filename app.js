@@ -434,12 +434,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 섹션 숨기기/보이기
             document.querySelectorAll('main section.card').forEach(sec => {
                 if (showList.includes(sec.id)) {
-                    sec.style.display = 'block';
+                    sec.classList.remove('hidden');
+                    sec.style.display = 'block'; // Fallback
                 } else {
-                    sec.style.display = 'none';
+                    sec.classList.add('hidden');
+                    sec.style.display = 'none'; // Fallback
                 }
             });
         });
+    });
+
+    // 초기 화면 상태 설정 (대시보드 기준)
+    const initialTarget = '#dashboard';
+    const initialShowList = sections[initialTarget];
+    document.querySelectorAll('main section.card').forEach(sec => {
+        if (initialShowList.includes(sec.id)) {
+            sec.classList.remove('hidden');
+            sec.style.display = 'block';
+        } else {
+            sec.classList.add('hidden');
+            sec.style.display = 'none';
+        }
     });
 
 

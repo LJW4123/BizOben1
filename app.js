@@ -505,21 +505,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!listBody) return;
 
         const mockData = [
-            { company: '(주)테크솔루션', manager: '홍*동', phone: '010-12**-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:30:21', color: 'high' },
-            { company: '미래바이오(주)', manager: '김*영', phone: '010-23**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:29:58', color: 'medium' },
-            { company: '스카이엔지니어링', manager: '이*준', phone: '010-34**-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:28:47', color: 'low' },
-            { company: '(주)그린에너지', manager: '박*민', phone: '010-45**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:27:13', color: 'medium' },
-            { company: '넥스트피아(주)', manager: '최*아', phone: '010-56**-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:25:39', color: 'high' },
-            { company: '하이퍼커넥트', manager: '정*훈', phone: '010-67**-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:24:02', color: 'low' },
-            { company: '에이플러스랩', manager: '오*린', phone: '010-78**-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:22:18', color: 'medium' },
+            { company: '(주)테크솔루션', manager: '홍*동', phone: '010-12**-****', email: 'j***@techsol.co.kr', address: '서울시 강남구 **로 **길 **', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:30:21', color: 'high' },
+            { company: '미래바이오(주)', manager: '김*영', phone: '010-23**-****', email: 'k***@mirbio.co.kr', address: '경기도 성남시 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:29:58', color: 'medium' },
+            { company: '스카이엔지니어링', manager: '이*준', phone: '010-34**-****', email: 'l***@skyeng.co.kr', address: '부산시 해운대구 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:28:47', color: 'low' },
+            { company: '(주)그린에너지', manager: '박*민', phone: '010-45**-****', email: 'p***@greenenergy.co.kr', address: '대전시 유성구 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:27:13', color: 'medium' },
+            { company: '넥스트피아(주)', manager: '최*아', phone: '010-56**-****', email: 'c***@nextpia.co.kr', address: '인천시 연수구 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '상', date: '2025-05-23 14:25:39', color: 'high' },
+            { company: '하이퍼커넥트', manager: '정*훈', phone: '010-67**-****', email: 'j***@hyperconnect.co.kr', address: '광주시 서구 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '하', date: '2025-05-23 14:24:02', color: 'low' },
+            { company: '에이플러스랩', manager: '오*린', phone: '010-78**-****', email: 'o***@apluslab.co.kr', address: '울산시 남구 **로', beneficiaryId: 'BEN-2026-****', status: '저장 완료', importance: '중', date: '2025-05-23 14:22:18', color: 'medium' },
         ];
 
         listBody.innerHTML = mockData.map(item => `
-            <tr style="cursor:pointer;" onclick="updateApiPreview('${item.company}', '${item.manager}')">
-                <td>${item.company}</td>
+            <tr style="cursor:pointer;" onclick="updateApiPreview('${item.company}', '${item.manager}', '${item.email}', '${item.address}', '${item.beneficiaryId}')">
+                <td style="font-weight:500;">${item.company}</td>
                 <td>${item.manager}</td>
-                <td>${item.phone}</td>
-                <td><span class="status-badge status-done">${item.status}</span></td>
+                <td style="font-size:12px;">${item.phone}</td>
+                <td style="font-size:12px; color:var(--primary-light);">${item.email}</td>
+                <td style="font-size:12px;">${item.address}</td>
+                <td style="font-size:12px; color:var(--text-muted);">${item.beneficiaryId}</td>
+                <td><span style="background:#EBFDF5; color:#10B981; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:700;">저장 완료</span></td>
                 <td><span class="importance-tag importance-${item.color}">${item.importance}</span></td>
                 <td style="font-size:12px; color:var(--text-muted);">${item.date}</td>
             </tr>
@@ -553,18 +556,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         `).join('');
     }
 
-    window.updateApiPreview = (company, manager) => {
+    window.updateApiPreview = (company, manager, email, address, beneficiaryId) => {
         const jsonBlock = document.getElementById('jsonPreview');
-        const detailValue = document.querySelector('#apiDataDetail .detail-value');
         
         // Mock JSON update
         const mockJson = {
             "companyName": company,
             "contactName": manager,
             "phone": "010-****-****",
-            "email": manager === '홍*동' ? "j***@techsol.co.kr" : "contact@masked.com",
-            "address": "서울시 **구 **로 **길 **",
-            "beneficiaryId": "BEN-2026-****",
+            "email": email,
+            "address": address,
+            "beneficiaryId": beneficiaryId,
             "businessNumber": "12*-**-*****"
         };
         

@@ -818,11 +818,11 @@ body {
     color: var(--text-muted);
 }
 
-/* Page Layout with Side Panel */
+/* Page Layout with Side Panel (Flexible Ratio) */
 .page-layout {
     display: grid;
-    grid-template-columns: 1fr 350px;
-    gap: 24px;
+    grid-template-columns: minmax(0, 1.8fr) minmax(320px, 1fr);
+    gap: 30px;
     align-items: start;
 }
 
@@ -888,7 +888,7 @@ body {
 .importance-medium { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
 .importance-low { background: rgba(16, 185, 129, 0.1); color: var(--success); }
 
-/* Side Panel */
+/* Side Panel Scaling */
 .side-panel {
     background: var(--white);
     border-radius: 12px;
@@ -896,6 +896,8 @@ body {
     padding: 24px;
     position: sticky;
     top: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+    min-width: 320px;
 }
 
 .side-panel h3 {

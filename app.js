@@ -549,11 +549,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!listBody) return;
 
         const mockReports = [
-            { id: 1, name: '기업 사회공헌 운영 리포트.pdf', base: '기업정보, 담당자, 수혜자ID', items: '마스킹 데이터, 매칭 점수, 운영 인사이트', date: '2025-05-23 14:40', format: 'PDF', status: '완료' },
-            { id: 2, name: '취약계층 지원 현황 요약.xlsx', base: '수혜자ID, 업무진행, 마스킹데이터', items: '지역별 분포, 지원 물품 리스트, 마스킹 일지', date: '2025-05-23 13:25', format: 'XLSX', status: '완료' },
-            { id: 3, name: '기관별 협업 이슈 분석 리포트.pdf', base: 'API 연동, 협업이슈, 업무진행', items: '이슈 트래킹, 해결 현황, 참여자 얼라인 점수', date: '2025-05-22 17:08', format: 'PDF', status: '완료' },
-            { id: 4, name: 'ESG 활동 증빙용 요약본.pdf', base: '기업정보, 업무진행, 리포트자료', items: '탄소 절감 효과, 사회적 가치 지표, 증빙 사진', date: '2025-05-22 11:45', format: 'PDF', status: '완료' },
-            { id: 5, name: '지원 대상자 마스킹 데이터 리포트.xlsx', base: '마스킹데이터, 수혜자ID', items: '개인정보 비식별화 내역, 접근 로그, 보안 감사', date: '2025-05-21 16:32', format: 'XLSX', status: '완료' },
+            { id: 1, name: 'XX 협업 리포트.pdf', base: '기업정보, 담당자, 수혜자ID', items: '마스킹 데이터, 매칭 점수, 운영 인사이트', date: '2025-05-23 14:40', format: 'PDF', status: '완료' },
+            { id: 2, name: 'OO 협업 리포트.xlsx', base: '수혜자ID, 업무진행, 마스킹데이터', items: '지역별 분포, 지원 물품 리스트, 마스킹 일지', date: '2025-05-23 13:25', format: 'XLSX', status: '완료' },
+            { id: 3, name: 'AA 협업 리포트.pdf', base: 'API 연동, 협업이슈, 업무진행', items: '이슈 트래킹, 해결 현황, 참여자 얼라인 점수', date: '2025-05-22 17:08', format: 'PDF', status: '완료' },
+            { id: 4, name: 'BB 협업 리포트.pdf', base: '기업정보, 업무진행, 리포트자료', items: '탄소 절감 효과, 사회적 가치 지표, 증빙 사진', date: '2025-05-22 11:45', format: 'PDF', status: '완료' },
+            { id: 5, name: 'CC 협업 리포트.xlsx', base: '마스킹데이터, 수혜자ID', items: '개인정보 비식별화 내역, 접근 로그, 보안 감사', date: '2025-05-21 16:32', format: 'XLSX', status: '완료' },
         ];
 
         listBody.innerHTML = mockReports.map(report => `
